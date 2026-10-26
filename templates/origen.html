@@ -1,0 +1,45 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ORIGEN X-01</title>
+<style>
+body{margin:0;background:#000;color:#00ffd1;font-family:Courier,monospace;overflow:hidden}
+.top{border:2px solid #00ffd1;margin:6px;padding:6px;text-align:center;font-size:10px;box-shadow:0 0 10px #00ffd1}
+.hud{display:grid;grid-template-columns:260px 1fr 260px;gap:8px;padding:8px;height:92vh}
+.panel{border:1px solid #00ffd188;padding:10px;background:rgba(0,255,209,.04);font-size:12px;line-height:1.4}
+.mid{border:2px solid #00ffd1;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;box-shadow:0 0 30px #00ffd1 inset;padding-top:15px}
+#chat{width:92%;height:300px;overflow-y:auto;background:#000a;border:1px solid #00ffd144;padding:8px;margin:10px;font-size:13px}
+.bar{display:flex;width:92%;gap:6px}
+input{flex:1;background:#000;border:1px solid #00ffd1;color:#00ffd1;padding:12px}
+button{border:none;padding:12px;font-weight:bold;cursor:pointer}
+.btn-send{background:#00ffd1;color:#000}
+.btn-voice{background:transparent;color:#00ffd1;border:1px solid #00ffd1}
+.sword{font-size:10px;white-space:pre;line-height:1;opacity:.8}
+@media(max-width:900px){.hud{grid-template-columns:1fr}.panel{display:none}}
+</style></head>
+<body>
+<div class="top">WEAPON SYSTEM: X-010 ONLINE • ALEACION ORIGEN X-01: STABLE • PROTOCOLO ONE FOR ALL: ACTIVO • ORIGEN X-01 FINAL</div>
+<div class="hud">
+<div class="panel"><b>SYSTEM DIAGNOSTICS</b><br><br>REACTOR: ONLINE<br>OUTPUT: 100%<br>CORE TEMP: 26.4°C<br><br><b>MISION</b><br><span id="mision">Cargando...</span><br><br><b>ALEACION X-01</b><br>Tungsteno-Ti + YAG:Ce<br>Zafiro filo: ACTIVO<br>Estado: SIMULACION ENERGIA OK</div>
+<div class="mid"><h1 style="letter-spacing:10px;margin:5px">ORIGEN</h1><p style="font-size:11px;margin:0">J.A.R.V.I.S. vFinal // NEURAL LINK ACTIVE</p>
+<div class="sword">    --→ X-010 ENERGY EDGE TEAL ←--</div>
+<div id="chat"><div>ORIGEN: Listo, Tony. Protocolo One For All activo. ¿Qué construimos hoy para que la próxima generación no tenga miedo?</div></div>
+<div class="bar"><input id="m" placeholder="Habla con ORIGEN..." onkeydown="if(event.key==='Enter')send()"><button class="btn-voice" onclick="voice()">🎤</button><button class="btn-send" onclick="send()">></button></div></div>
+<div class="panel"><b>APPLICATIONS</b><br><br>VLC: RUNNING 100%<br>Photoshop: RUNNING<br>ORIGEN: RUNNING 100%<br><br><b>WEAPON</b><br>X-010 Dual<br>Filo: Teal Energy<br>Modo: Reposo/Metal<br>Modo: Activo/Plasma<br><br><a href="/logout" style="color:#00ffd1">Cerrar sesion</a></div>
+</div>
+<script>
+let synth = window.speechSynthesis;
+async function loadM(){let r=await fetch('/api/memoria');let d=await r.json();document.getElementById('mision').innerText=d.mision||'One For All'}
+loadM();
+async function send(){
+let i=document.getElementById('m'),m=i.value;if(!m)return;
+let c=document.getElementById('chat');c.innerHTML+=`<div style="margin:6px 0"><b>TU:</b> ${m}</div>`;i.value='';
+let res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})});
+let data=await res.json();
+c.innerHTML+=`<div style="margin:6px 0;color:#fff"><b>ORIGEN:</b> ${data.reply}</div>`;
+if(data.image)c.innerHTML+=`<img src="${data.image}" style="width:100%;border:1px solid #00ffd1;margin-top:8px;border-radius:8px">`;
+c.scrollTop=c.scrollHeight;
+if(synth){let u=new SpeechSynthesisUtterance(data.reply);u.lang='es-MX';u.rate=1;synth.speak(u);}
+}
+function voice(){
+let rec=new (window.SpeechRecognition||window.webkitSpeechRecognition)();rec.lang='es-MX';rec.start();
+rec.onresult=e=>{document.getElementById('m').value=e.results[0][0].transcript;send();}
+}
+</script></body></html>
